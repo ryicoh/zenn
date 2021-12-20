@@ -19,3 +19,5 @@ https://stackoverflow.com/questions/39061041/using-an-api-key-in-amazon-api-gate
 ここの部分
 
 ![](https://user-images.githubusercontent.com/37844673/146813242-e2bdf098-0018-420a-9cd9-21ee50f9e34a.png)
+
+なんてこったぁ。デフォルトで動かないなんて。
