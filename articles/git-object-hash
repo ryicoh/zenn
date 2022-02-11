@@ -1,11 +1,36 @@
 ---
-title: 'Gitのハッシュ計算をマスターする'
+title: 'Gitは内部でどのようにデータを扱うのか'
 emoji: "⛳"
 type: "tech"
 topics: ["git"]
 published: false
 ---
 
-# Git オブジェクト
+## 概要
+
+Gitでハッシュといえば、コミットハッシュでしょう。
+しかし、実はそれだけではなく、データやファイル構造なんかもハッシュによって管理されています。
+この記事では、Gitコマンドは分かるけどもっと詳しくGitについて知りたい人向けに、Gitが内部でどのようにデータを扱うのかについて説明します。
+
+
+## Gitのオブジェクト
+
+Gitのデータ、つまり `オブジェクト` は、.git/objects/ に保存されています。
+手元のリポジトリで以下のように `find` コマンドを実行すると、40桁のハッシュのファイルが表示されます。
+この40桁のファイル名は、ハッシュアルゴリズムである [SHA-1](https://en.wikipedia.org/wiki/SHA-1)のハッシュ値になります。
+
+```
+find .git/objects -type f
+.git/objects/68/aba62e560c0ebc3396e8ae9335232cd93a3f60
+.git/objects/3b/18e512dba79e4c8300dd08aeb37f8e728b8dad
+```
+
+最初にハッシュ
+
+1. blob: Blob Binary Large OBjectのこと
+2. tree: ディレクトリ1階層分のファイル名とblob の
+3. commit
+4. tag
+
 
 # Git はファイルとファイルの内容を別々に保存する
