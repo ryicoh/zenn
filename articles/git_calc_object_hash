@@ -1,7 +1,58 @@
 ---
-title: 'Gitは内部でどのようにデータを扱うのか'
+title: 'Gitのオブジェクトハッシュの計算方法'
 emoji: "⛳"
 type: "tech"
 topics: ["git"]
 published: false
 ---
+
+## Git のオブジェクト
+
+最初に少しだけGitのデータ(オブジェクト)の保存方法について触れます。
+オブジェクトは `.git/objects/` に保存されます。
+この中にリポジトリのファイルを効率的に保存します。
+バージョンごとに同じファイルを重複して保存することはありません。
+ファイルだけではありません。４種類のオブジェクトを保存します。
+
+1. blob: Binary Large OBjecctの略で、つまりはファイルです。しかし、ファイル名は含みません。
+2. tree: １階層分のディレクトリの全ファイル名とファイル内容のハッシュと権限です。
+3. commit: `git commit` で作られます。コミット内容とか作成者、作成日時などが含まれます。コミットハッシュやコミットSHAと呼ばれるものです。
+4. tag: `git tag` で作られます。本質的には `commit` とあまり変わりません。
+
+なぜ、重複せずに保存できるのか？
+重要なのは、ハッシュ値により同じファイルかどうかを判断しているからです。
+`blob` はファイル名を含みません。これは、ファイル名が違っても同じ内容ならば１つのオブジェクトしか作らないことを意味します。
+`tree` も同様です。同じ全くディレクトリならば、重複して作られません。
+
+この記事では、Gitは触れるけどもう少し詳しく知りたい人むけに、 `blob` と `tree` のハッシュ値を求める方法を説明します。
+
+### 検証用のディレクトリの準備
+まずは、適当に `git repository` を作って、`.git/objects`を見てみましょう。最初は何も入っていないはずです。
+```bash
+$ cd /tmp
+$ mkdir git_calc_hash
+$ cd git_calc_hash
+$ git init
+$ find .git/objects -type f
+```
+
+## blob のハッシュ
+
+`git add` してみると、一つファイルが追加されました。
+今回のオブジェクトは `blob` です。 `git cat-file blob` で中身を表示できます。
+引数のハッシュは4桁以上なら、省略しても構いません。
+
+```
+$ echo "hello world" > hello.txt
+$ git add hello.txt
+$ find .git/objects -type f
+.git/objects/3b/18e512dba79e4c8300dd08aeb37f8e728b8dad
+$ git cat-file blob 3b18
+```
+
+さて、この `3b18e512dba79e4c8300dd08aeb37f8e728b8dad` を導いてみます。
+
+```
+(echo -en "blob `wc -c ./hello.txt | awk '{print $1}'`\0" && cat ./hello.txt ) | openssl sha1
+```
+
