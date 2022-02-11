@@ -52,9 +52,10 @@ $ git cat-file blob 3b18
 
 さて、この `3b18e512dba79e4c8300dd08aeb37f8e728b8dad` を導いてみます。
 フォーマットは、`blob <ファイルのバイト数>\0<ファイルの内容>` です。
+\0 はバイナリのゼロです。
 
 ```bash
-echo "blob `wc -c ./hello.txt | awk '{print $1}'`\0`cat ./hello.txt`" | openssl sha1
+$ echo "blob `wc -c ./hello.txt | awk '{print $1}'`\0`cat ./hello.txt`" | openssl sha1
 3b18e512dba79e4c8300dd08aeb37f8e728b8dad
 ```
 
@@ -62,3 +63,45 @@ echo "blob `wc -c ./hello.txt | awk '{print $1}'`\0`cat ./hello.txt`" | openssl 
 
 ## tree のハッシュ
 
+今度はツリーです。
+まずは同様にツリーのオブジェクトも作ってみましょう。
+
+```bash
+$ git write-tree
+68aba62e560c0ebc3396e8ae9335232cd93a3f60
+$ find .git/objects -type f
+.git/objects/68/aba62e560c0ebc3396e8ae9335232cd93a3f60
+.git/objects/3b/18e512dba79e4c8300dd08aeb37f8e728b8dad
+```
+
+
+68ab...が追加されました。中身を見てみましょう。
+
+```bash
+$ git cat-file tree 68ab
+100644 hello.txt;ۧr
+```
+
+`100644` はパーミッションで、`hello.txt`はファイル名ですね。
+最後の`;r` はバイナリのようです。`hexdump`で見てみましょう
+
+```
+$ git cat-file tree 68ab | hexdump -C
+00000000  31 30 30 36 34 34 20 68  65 6c 6c 6f 2e 74 78 74  |100644 hello.txt|
+00000010  00 3b 18 e5 12 db a7 9e  4c 83 00 dd 08 ae b3 7f  |.;......L.......|
+00000020  8e 72 8b 8d ad                                    |.r...|
+00000025
+```
+
+"\0"を挟んで、`3b 18 ...` なので、先ほど計算した、hello.txtのハッシュのようです。
+フォーマットは、`<パーミッション> <ファイル名>\0<ファイルのハッシュ>` ですね。
+では、計算してみましょう。
+
+```bash
+$ oid=$((echo -n "blob `wc -c ./hello.txt | awk '{print $1}'`\0" && cat ./hello.txt) | openssl sha1)
+$ content="`stat -f "%p" ./hello.txt` hello.txt\0`echo -n $oid | xxd -r -p -`"
+$ (echo -en "tree `echo -n $content | wc -c | awk '{print $1}'`\0" && echo -n $content) | openssl sha1
+68aba62e560c0ebc3396e8ae9335232cd93a3f60
+```
+
+計算できました。
