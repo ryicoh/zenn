@@ -42,7 +42,7 @@ $ find .git/objects -type f
 今回のオブジェクトは `blob` です。 `git cat-file blob` で中身を表示できます。
 引数のハッシュは4桁以上なら、省略しても構いません。
 
-```
+```bash
 $ echo "hello world" > hello.txt
 $ git add hello.txt
 $ find .git/objects -type f
@@ -51,8 +51,14 @@ $ git cat-file blob 3b18
 ```
 
 さて、この `3b18e512dba79e4c8300dd08aeb37f8e728b8dad` を導いてみます。
+フォーマットは、`blob <ファイルのバイト数>\0<ファイルの内容>` です。
 
+```bash
+echo "blob `wc -c ./hello.txt | awk '{print $1}'`\0`cat ./hello.txt`" | openssl sha1
+3b18e512dba79e4c8300dd08aeb37f8e728b8dad
 ```
-(echo -en "blob `wc -c ./hello.txt | awk '{print $1}'`\0" && cat ./hello.txt ) | openssl sha1
-```
+
+先ほどの値と同じになりました。
+
+## tree のハッシュ
 
