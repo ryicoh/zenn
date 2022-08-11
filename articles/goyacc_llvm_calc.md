@@ -3,7 +3,7 @@ title: 'GoとLLVMで電卓を作る'
 emoji: "🕠"
 type: "tech"
 topics: ["go", "yacc", "llvm"]
-published: false
+published: true
 ---
 
 ## 自作言語作りたい
