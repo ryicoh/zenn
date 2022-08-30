@@ -3,7 +3,7 @@ title: 'GraphQLからSQLにパースするライブラリを作りたい！'
 emoji: "⛳"
 type: "tech"
 topics: ["graphql", "sql", "golang"]
-published: false
+published: true
 ---
 
 タイトルの通り、GraphQLからSQLにパースするライブラリを作りたくて、その背景や目的を共有するためにこの記事を書く。
