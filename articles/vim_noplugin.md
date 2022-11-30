@@ -3,6 +3,7 @@ title: 'プラグインなしでVimを使うテクニック'
 emoji: "⛳"
 type: "tech"
 topics: ["vim", "neovim"]
+publication_name: "vim_jp"
 published: false
 ---
 
@@ -37,7 +38,7 @@ vimrcも複雑な設定は無しです。
 例えば、`:e **/*Repository.php<C-d>`で〜リポジトリを検索します。
 ここでももちろん、`<C-d>`です。候補が少なくなれば、`<Tab>`と`<S-Tab>`でファイルを選びましょう。
 `*`を使っていない部分は`<C-l>`で候補結果を見て最長一致するところまで補完してくれます。
-また、一度`<Tab>`を押すと`<C-n>`と`<C-p>` でも上下移動できます。`<C-w>`を押すと１文字消してくれます。
+また、一度`<Tab>`を押すと`<C-n>`と`<C-p>` でも上下移動できます。`<C-w>`を押すと１単語消してくれます。
 
 # ファイル数が多いプロジェクトのファイルの検索には :find を使う
 
@@ -91,7 +92,7 @@ let g:netrw_liststyle = 3
 
 他のEから始まるコマンドと競合する場合は以下の設定をしておきましょう。
 ```
-command! -nargs=? E Explore <f-args>
+command! -nargs=? E Explore <args>
 ```
 
 # ファイル・文字列検索
