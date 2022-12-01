@@ -4,7 +4,7 @@ emoji: "⛳"
 type: "tech"
 topics: ["vim", "neovim"]
 publication_name: "vim_jp"
-published: false
+published: true
 ---
 
 プラグインなしでVimを使うテクニックについて説明します。
@@ -19,7 +19,6 @@ vimrcも複雑な設定は無しです。
 *  文字列検索は `:vimgrep`
 *  ビルドのエラー表示は `:make`
 *  LSP を使う(neovim限定)
-*  LSP の補完を使う (neovim限定)
 
 # モチベーション
 
@@ -68,10 +67,18 @@ Vimではタブを使うよりバッファを使う方が早いです。
 例えば、`~/.config.nvim/init.vim` を開き直したい場合は、`:b ini<Tab><CR>` で開けます。
 １個前のファイルとかなら、`:b[p]revious`を使います。
 
+新しいwindowsで開く場合は、`:sb`、`:vert sb`です。
+
 ## 過去に開いたファイルは、:browse oldfiles を使う
 
 バッファは一度Vimを閉じると全て消えちゃいますので、
 Vimを新しく開いあとは`v:oldfiles`からファイルを探します。
+`echo v:oldfiles` で配列が返ってきますが、そこからファイルを選びたい場合は、
+`:browse`を組み合わせて使うと良いでしょう。
+
+
+ここまでをまとめると、ファイルを探すときは、まずは`:b <C-d>`、次に`:bro old`、
+その次に`:e <C-d>`、`:fin <C-d>`の順番で考えましょう。
 
 # ファイラーにnetrwを使う
 
@@ -100,13 +107,14 @@ command! -nargs=? E Explore <args>
 ## フォルダ内の文字列検索には :vimgrep を使う
 
 `:vim` で使えます。
-src フォルダ内を検索したい場合は、`:vim hello src/** | cw` とすると、quickfix window が開いて、そのままクリックするだけで開けます。
-`:cn` で次のマッチ、`:cnf`で次のファイルのマッチ、`:cp` で前のマッチに飛びます。
+src フォルダ内を検索したい場合は、`:vim hello src/** | cw` とすると、`quickfix window` が開いて、そのままクリックするだけで開けます。
+`:cc` で現在のエラー、`:cn` で次のエラー、`:cnf`で次のファイルのエラー、`:cp` で前のエラーに飛びます。
+`@:` で前に実行したコマンドが打てて、一度`@:`を押すとマクロ同様に`@@`で繰り返せます。
 
 
 # 診断・ビルドのエラー表示とジャンプ
 
-## 代わりに:makeを使う
+## :makeを使う
 
 `:make` で `make` を実行できます。C/C++専用のビルドツールという印象があるかと思いますが、
 単にシェルを実行するツールとして利用できます。
@@ -121,3 +129,66 @@ build:
 
 または、`set makeprog=eslint\ -f\ unix` で `make`コマンドを使わずに直接実行したいプログラムを指定することも可能です。
 コマンド実行時に返される文字列のフォーマットは`errorformat`で設定できますが、ちょっとめんどくさいです。。
+
+
+# LSP を使う(neovim限定)
+
+[LSP](https://microsoft.github.io/language-server-protocol/specifications/lsp/3.17/specification/) はざっと以下の機能を持つ開発に必須のツールです。
+
+* 定義ジャンプ、参照ジャンプ
+* ハイライト
+* ドキュメント表示
+* コード補完
+* エラー診断
+* コードアクション(修正してくれるやつ）
+* フォーマット
+* 名前変更
+
+残念ながらプラグイン無しだとNeovimしか対応していませんので注意してください。
+設定方法は、`:h vim.lsp` を見ましょう。
+goplsの場合は、以下のように設定します。
+
+```
+vim.api.nvim_create_autocmd("BufReadPost", {
+  pattern = "*.go",
+  callback = function()
+    vim.lsp.start({
+      name = 'gopls',
+      cmd = {'gopls'},
+      root_dir = vim.fs.dirname(vim.fs.find({'go.mod'}, { upward = true })[1]),
+    })
+  end
+})
+```
+
+さてこの設定だけで結構たくさんのことができます。
+
+* タグジャンプの`<C-[>`が使えます。ウィンドウ分割する場合は`<C-w><C-[>`です。
+`<C-w>{`でプレビューウィンドウに表示できます。
+
+* コード補完は、`<C-x><C-o>`で使えます。変数名やメソッド名などが出てくれます。
+
+* エラー表示
+
+デフォルトでエラーを表示してくれますが移動はできません。移動するには`vim.diagnostic.goto_next`が有名ですが、
+今回は、`:vimgrep`や`:make`と同様に`quickfix window`に出してみましょう。
+設定は以下です。
+
+```
+augroup my-lsp-diagnostic
+  au!
+  au DiagnosticChanged *.go,*.ts,*.tsx lua vim.diagnostic.setqflist({open = false})
+augroup end
+```
+
+他の項目は、`lua vim.lsp.xxx`をそれぞれマッピングして使う必要があります。
+
+以上です。
+
+本記事の設定はこちらから見れます。
+https://github.com/ryicoh/config_nvim_without_plugin
+
+
+Vimはプラグインがなくても割と色々できることが少しでも伝わればいいなと思います。
+おしまい
+
