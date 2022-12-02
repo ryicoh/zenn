@@ -88,7 +88,7 @@ Vimを新しく開いあとは`v:oldfiles`からファイルを探します。
 `<CR>` でディレクトリを開閉かファイルを開けます。
 `t` で新しいタブで開き、`o` や `v` で上下左右に分割して開きます。
 ツリーにするには以下の設定をしときましょう。
-```
+```vimscript
 let g:netrw_liststyle = 3
 ```
 
@@ -98,7 +98,7 @@ let g:netrw_liststyle = 3
 逆にルートから開き直したい場合は、`:E .` としましょう。
 
 他のEから始まるコマンドと競合する場合は以下の設定をしておきましょう。
-```
+```vimscript
 command! -nargs=? E Explore <args>
 ```
 
@@ -120,7 +120,7 @@ src フォルダ内を検索したい場合は、`:vim hello src/** | cw` とす
 単にシェルを実行するツールとして利用できます。
 Makefile にコマンドを設定して、`:mak lint` で `quickfix window` に出します。
 
-```
+```Makefile
 lint:
 	eslint --ext=js,ts -f unix --fix .
 build:
@@ -148,7 +148,7 @@ build:
 設定方法は、`:h vim.lsp` を見ましょう。
 goplsの場合は、以下のように設定します。
 
-```
+```lua
 vim.api.nvim_create_autocmd("BufReadPost", {
   pattern = "*.go",
   callback = function()
@@ -171,17 +171,29 @@ vim.api.nvim_create_autocmd("BufReadPost", {
 * エラー表示
 
 デフォルトでエラーを表示してくれますが移動はできません。移動するには`vim.diagnostic.goto_next`が有名ですが、
-今回は、`:vimgrep`や`:make`と同様に`quickfix window`に出してみましょう。
+今回は、`:vimgrep`や`:make`で使った`quickfix window` の１つのファイル専用版である `location list` に出してみましょう。
 設定は以下です。
 
-```
+```vimscript
 augroup my-lsp-diagnostic
   au!
-  au DiagnosticChanged *.go,*.ts,*.tsx lua vim.diagnostic.setqflist({open = false})
+  " diagnostic (エラー) を location list に出す
+  au DiagnosticChanged *.go,*.ts,*.tsx lua vim.diagnostic.setloclist({open = false})
 augroup end
 ```
 
 他の項目は、`lua vim.lsp.xxx`をそれぞれマッピングして使う必要があります。
+
+```vimscript
+" カーソル下の変数名変更
+nnoremap <leader>rn :<C-u>lua vim.lsp.buf.rename('')<Left><Left>
+
+" ファイルのフォーマット
+nnoremap <leader>f <Cmd>lua vim.lsp.buf.format()<CR>
+
+" プロジェクト内の全てのエラーを `quickfix window`に出す
+nnoremap <leader>q <Cmd>lua vim.diagnostic.setqflist()<CR>
+```
 
 以上です。
 
