@@ -11,7 +11,7 @@ published: true
 
 # TL;DR
 
-Makefileに以下の追加して、`:make`します。
+Makefileに以下の追加して、`:make typecheck`します。
 
 ```:Makefile
 typecheck:
@@ -25,7 +25,7 @@ TypeScriptのLanguage Server(`tsserver`)は開いてるファイルしかエラ�
 
 vim/nvimには、`:make`というMakefileを実行してくれる機能があります。
 そして、そこで見つけたエラーは`Quickfix`というところに貯めてくれて、エラーリストを行き来できたりします。
-コミット前とかに`:make`しとくと、CIで落ちる前に気づけて便利です。
+コミット前とかに`:make typecheck`しとくと、CIで落ちる前に気づけて便利です。
 
 sedしてるのは、`tsc`コマンドからの出力フォーマットが`vim`の`errorformat`に対応していないためです。行番号の部分を書き換えています。
 最近、Next.jsがディレクトリ名に`()`を入れ始めて、バグったのでこの正規表現を書き換えたためこの記事を書きました。
