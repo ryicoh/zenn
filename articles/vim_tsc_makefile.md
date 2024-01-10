@@ -4,7 +4,7 @@ emoji: "⛳"
 type: "tech"
 topics: ["vim", "neovim", "TypeScript"]
 publication_name: "vim_jp"
-published: false
+published: true
 ---
 
 やりたいことは、プロジェクト全体の型チェックを行い、エラーのリスト(`Quickfix`)を取得することです。
